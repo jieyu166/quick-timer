@@ -9,24 +9,32 @@
     <script type="text/javascript" src="index.js"></script>
   </head>
   <body>
-    <div id="timer">????</div>
-    <div id="meta">
-      <div class="meta-row">
-        <span class="label">暫停累計</span>
-        <span id="paused-time">00:00</span>
+    <div id="timer-wrap">
+      <div id="timer">????</div>
+      <div id="meta">
+        <div class="meta-row">
+          <span class="label">暫停累計</span>
+          <span id="paused-time">00:00</span>
+        </div>
+        <div class="meta-row" id="session-result"></div>
       </div>
-      <div class="meta-row" id="session-result"></div>
     </div>
-    <a class="btn btn-info fbtn" id="min60" onclick="adjust(-60)">-60</a>
-    <a class="btn btn-info fbtn" id="min10" onclick="adjust(-10)">-10</a>
-    <a class="btn btn-primary" id="toggle" onclick="toggle()">RUN</a>
-    <a class="btn btn-warning" id="reset" onclick="reset()">RESET</a>
-    <a class="btn btn-default" id="hide" onclick="show()">&#xd60;</a>
-    <a class="btn btn-info fbtn" id="add10" onclick="adjust(10)">+10</a>
-    <a class="btn btn-info fbtn" id="add60" onclick="adjust(60)">+60</a>
-    <a class="btn btn-success fbtn" id="def300" onclick="adjust(0,300)">5 min</a>
-    <a class="btn btn-success fbtn" id="def1500" onclick="adjust(0,1500)">25 min</a>
-    <a class="btn btn-success fbtn" id="def1800" onclick="adjust(0,1800)">30 min</a>
-    <a class="btn btn-success fbtn" id="def2400" onclick="adjust(0,2400)">40 min</a>
+    <div id="controls">
+      <div class="control-row">
+        <a class="btn btn-info fbtn" id="min60" onclick="adjust(-60)">-60</a>
+        <a class="btn btn-info fbtn" id="min10" onclick="adjust(-10)">-10</a>
+        <a class="btn btn-primary" id="toggle" onclick="toggle()">RUN</a>
+        <a class="btn btn-warning" id="reset" onclick="reset()">RESET</a>
+        <a class="btn btn-default" id="hide" onclick="show()">&#xd60;</a>
+        <a class="btn btn-info fbtn" id="add10" onclick="adjust(10)">+10</a>
+        <a class="btn btn-info fbtn" id="add60" onclick="adjust(60)">+60</a>
+      </div>
+      <div class="control-row presets">
+        <a class="btn btn-success fbtn" id="def300" onclick="adjust(0,300)">5 min</a>
+        <a class="btn btn-success fbtn" id="def1500" onclick="adjust(0,1500)">25 min</a>
+        <a class="btn btn-success fbtn" id="def1800" onclick="adjust(0,1800)">30 min</a>
+        <a class="btn btn-success fbtn" id="def2400" onclick="adjust(0,2400)">40 min</a>
+      </div>
+    </div>
   </body>
 </html>

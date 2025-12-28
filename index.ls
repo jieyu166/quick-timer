@@ -5,6 +5,7 @@ is-run = false
 is-show = true
 is-warned = false
 handler = null
+pause-updater = null
 latency = 0
 stop-by = null
 delay = 1500 * 1000
@@ -41,8 +42,11 @@ update-timer-display = (ms) ->
   $ \#timer .text format-duration ms
   resize!
 
+get-paused-total = ->
+  paused-total + if stop-by? => (new Date!)getTime! - stop-by.getTime! else 0
+
 update-paused-display = ->
-  $ \#paused-time .text format-duration paused-total
+  $ \#paused-time .text format-duration get-paused-total!
 
 show = ->
   is-show := !is-show
@@ -58,13 +62,18 @@ adjust = (it,v) ->
 toggle = ->
   is-run := !is-run
   $ \#toggle .text if is-run => "STOP" else "RUN"
-  if !is-run and handler =>
+  if !is-run =>
     stop-by := new Date!
-    clearInterval handler
+    if handler => clearInterval handler
     handler := null
     sound-toggle audio-end, false
     sound-toggle audio-remind, false
+    if pause-updater => clearInterval pause-updater
+    pause-updater := setInterval (-> update-paused-display!), 250
   if is-run and stop-by =>
+    if pause-updater =>
+      clearInterval pause-updater
+      pause-updater := null
     pause-duration = (new Date!)getTime! - stop-by.getTime!
     latency := latency + pause-duration
     paused-total := paused-total + pause-duration
@@ -81,6 +90,8 @@ reset = ->
   is-blink := false
   latency := 0
   paused-total := 0
+  if pause-updater => clearInterval pause-updater
+  pause-updater := null
   session-duration := delay
   completion-handled := false
   start := null #new Date!
@@ -121,7 +132,7 @@ handle-complete = ->
   completion-handled := true
   is-run := false
   stop-by := null
-  summary = "計時 #{format-duration session-duration)}，暫停 #{format-duration paused-total)}"
+  summary = "計時 #{format-duration session-duration}, 暫停 #{format-duration get-paused-total!}"
   done = window.prompt "完成幾份檢查？", ""
   if done? and done.trim!length > 0 and !isNaN(parseFloat done)
     finished = parseFloat done
@@ -146,12 +157,14 @@ run =  ->
 
 resize = ->
   tm = $ \#timer
-  w = tm.width!
-  h = $ window .height!
+  wrap = $ \#timer-wrap
+  w = wrap.width!
+  h = wrap.height!
   len = tm.text!length
   len>?=3
-  tm.css \font-size, "#{1.5 * w/len}px"
-  tm.css \line-height, "#{h}px"
+  base-size = 1.2 * w / len
+  font-size = Math.min(base-size, h * 0.7)
+  tm.css \font-size, "#{font-size}px"
 
 
 window.onload = ->

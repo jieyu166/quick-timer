@@ -1,5 +1,5 @@
 // Pomodoro-inspired timer logic
-var start, isBlink, isLight, isRun, isShow, isWarned, handler, latency, stopBy, delay, audioRemind, audioEnd, pausedTotal, sessionDuration, completionHandled;
+var start, isBlink, isLight, isRun, isShow, isWarned, handler, pauseUpdater, latency, stopBy, delay, audioRemind, audioEnd, pausedTotal, sessionDuration, completionHandled;
 start = null;
 isBlink = false;
 isLight = true;
@@ -7,6 +7,7 @@ isRun = false;
 isShow = true;
 isWarned = false;
 handler = null;
+pauseUpdater = null;
 latency = 0;
 stopBy = null;
 delay = 1500 * 1000;
@@ -15,7 +16,7 @@ audioEnd = null;
 pausedTotal = 0;
 sessionDuration = delay;
 completionHandled = false;
-var newAudio, soundToggle, formatDuration, updateTimerDisplay, updatePausedDisplay, show, adjust, toggle, reset, blink, handleComplete, count, run, resize;
+var newAudio, soundToggle, formatDuration, updateTimerDisplay, getPausedTotal, updatePausedDisplay, show, adjust, toggle, reset, blink, handleComplete, count, run, resize;
 newAudio = function(file){
   var node;
   node = new Audio();
@@ -59,73 +60,92 @@ updateTimerDisplay = function(ms){
   $('#timer').text(formatDuration(ms));
   return resize();
 };
+getPausedTotal = function(){
+  return pausedTotal + (stopBy != null ? new Date().getTime() - stopBy.getTime() : 0);
+};
 updatePausedDisplay = function(){
-  return $('#paused-time').text(formatDuration(pausedTotal));
+  return $('#paused-time').text(formatDuration(getPausedTotal()));
 };
 show = function(){
   isShow = !isShow;
   return $('.fbtn').css('opacity', isShow ? '1.0' : '0.1');
 };
-adjust = function(it, v){
-  if (isBlink) {
-    return;
-  }
-  delay = delay + it * 1000;
+  adjust = function(it, v){
+    if (isBlink) {
+      return;
+    }
+    delay = delay + it * 1000;
   if (it === 0) {
     delay = v * 1000;
   }
   if (delay <= 0) {
     delay = 0;
-  }
-  return updateTimerDisplay(delay);
-};
-toggle = function(){
-  var pauseDuration;
-  isRun = !isRun;
-  $('#toggle').text(isRun ? "STOP" : "RUN");
-  if (!isRun && handler) {
-    stopBy = new Date();
-    clearInterval(handler);
-    handler = null;
-    soundToggle(audioEnd, false);
+    }
+    return updateTimerDisplay(delay);
+  };
+  toggle = function(){
+    var pauseDuration;
+    isRun = !isRun;
+    $('#toggle').text(isRun ? "STOP" : "RUN");
+    if (!isRun) {
+      stopBy = new Date();
+      if (handler) {
+        clearInterval(handler);
+      }
+      handler = null;
+      soundToggle(audioEnd, false);
+      soundToggle(audioRemind, false);
+      if (pauseUpdater) {
+        clearInterval(pauseUpdater);
+      }
+      pauseUpdater = setInterval(function(){
+        return updatePausedDisplay();
+      }, 250);
+    }
+    if (isRun && stopBy) {
+      if (pauseUpdater) {
+        clearInterval(pauseUpdater);
+        pauseUpdater = null;
+      }
+      pauseDuration = new Date().getTime() - stopBy.getTime();
+      latency = latency + pauseDuration;
+      pausedTotal = pausedTotal + pauseDuration;
+      stopBy = null;
+      updatePausedDisplay();
+    }
+    if (isRun) {
+      return run();
+    }
+  };
+  reset = function(){
+    if (delay === 0) {
+      delay = 1000;
+    }
     soundToggle(audioRemind, false);
-  }
-  if (isRun && stopBy) {
-    pauseDuration = new Date().getTime() - stopBy.getTime();
-    latency = latency + pauseDuration;
-    pausedTotal = pausedTotal + pauseDuration;
+    soundToggle(audioEnd, false);
     stopBy = null;
+    isWarned = false;
+    isBlink = false;
+    latency = 0;
+    pausedTotal = 0;
+    if (pauseUpdater) {
+      clearInterval(pauseUpdater);
+    }
+    pauseUpdater = null;
+    sessionDuration = delay;
+    completionHandled = false;
+    start = null;
+    isRun = true;
+    toggle();
+    if (handler) {
+      clearInterval(handler);
+    }
+    handler = null;
     updatePausedDisplay();
-  }
-  if (isRun) {
-    return run();
-  }
-};
-reset = function(){
-  if (delay === 0) {
-    delay = 1000;
-  }
-  soundToggle(audioRemind, false);
-  soundToggle(audioEnd, false);
-  stopBy = null;
-  isWarned = false;
-  isBlink = false;
-  latency = 0;
-  pausedTotal = 0;
-  sessionDuration = delay;
-  completionHandled = false;
-  start = null;
-  isRun = true;
-  toggle();
-  if (handler) {
-    clearInterval(handler);
-  }
-  handler = null;
-  updatePausedDisplay();
-  $('#session-result').text("");
-  updateTimerDisplay(delay);
-  $('#timer').css('color', '#fff');
-};
+    $('#session-result').text("");
+    updateTimerDisplay(delay);
+    $('#timer').css('color', '#fff');
+  };
 blink = function(){
   isBlink = true;
   isLight = !isLight;
@@ -139,7 +159,7 @@ handleComplete = function(){
   completionHandled = true;
   isRun = false;
   stopBy = null;
-  summary = "計時 " + formatDuration(sessionDuration) + "，暫停 " + formatDuration(pausedTotal);
+  summary = "計時 " + formatDuration(sessionDuration) + "，暫停 " + formatDuration(getPausedTotal());
   done = window.prompt("完成幾份檢查？", "");
   if ((done != null ? done.trim().length : void 0) > 0 && !isNaN(parseFloat(done))) {
     finished = parseFloat(done);
@@ -200,16 +220,18 @@ run = function(){
     }, 100);
   }
 };
-resize = function(){
-  var tm, w, h, len;
-  tm = $('#timer');
-  w = tm.width();
-  h = $(window).height();
-  len = tm.text().length;
-  len >= 3 || (len = 3);
-  tm.css('font-size', 1.5 * w / len + "px");
-  return tm.css('line-height', h + "px");
-};
+  resize = function(){
+    var tm, wrap, w, h, len, baseSize, fontSize;
+    tm = $('#timer');
+    wrap = $('#timer-wrap');
+    w = wrap.width();
+    h = wrap.height();
+    len = tm.text().length;
+    len >= 3 || (len = 3);
+    baseSize = 1.2 * w / len;
+    fontSize = Math.min(baseSize, h * 0.7);
+    return tm.css('font-size', fontSize + "px");
+  };
 window.onload = function(){
   updateTimerDisplay(delay);
   updatePausedDisplay();
