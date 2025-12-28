@@ -82,3 +82,28 @@ body {
 #hide {
   min-width: 60px;
 }
+#meta {
+  position: absolute;
+  top: 60px;
+  left: 20px;
+  color: #0fd6ff;
+  font-weight: 600;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+}
+#meta .meta-row {
+  margin-top: 6px;
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+#meta .label {
+  font-size: 14px;
+}
+#meta #paused-time {
+  font-size: 16px;
+}
+#meta #session-result {
+  color: #d8f5ff;
+  max-width: 320px;
+  line-height: 1.3;
+}
