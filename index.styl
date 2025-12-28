@@ -20,7 +20,7 @@ html, body
   font-weight: 700
   font-family: century gothic
 
-#hide, #toggle, #reset, #min10, #min60, #add10, #add60, #def10, #def30, #def60, #def180, #def300, #def600, #def900, #def1800
+#hide, #toggle, #reset, #min10, #min60, #add10, #add60, #def300, #def1500, #def1800, #def2400
   position: absolute
   top: 5px
   left: 50%
@@ -37,7 +37,7 @@ html, body
 #min10, #min60, #add10, #add60
   width: 50px
 
-#def10, #def30, #def60, #def180, #def300, #def600, #def900, #def1800
+#def300, #def1500, #def1800, #def2400
   bottom: 5px
   top: auto
   width: 70px
@@ -50,22 +50,14 @@ html, body
 #add60
   margin-left: 290px
 
-#def10
-  margin-left: -285px
-#def30
-  margin-left: -205px
-#def60
-  margin-left: -125px
-#def180
-  margin-left: -45px
 #def300
-  margin-left: 35px
-#def600
-  margin-left: 115px
-#def900
-  margin-left: 195px
+  margin-left: -215px
+#def1500
+  margin-left: -75px
 #def1800
-  margin-left: 275px
+  margin-left: 65px
+#def2400
+  margin-left: 205px
 
 #audio
   position: absolute
@@ -77,3 +69,24 @@ html, body
   position: absolute
   top: 10px
   left: 10px
+
+#meta
+  position: absolute
+  top: 60px
+  left: 20px
+  color: #0fd6ff
+  font-weight: 600
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8)
+  .meta-row
+    margin-top: 6px
+    display: flex
+    gap: 8px
+    align-items: baseline
+  .label
+    font-size: 14px
+  #paused-time
+    font-size: 16px
+  #session-result
+    color: #d8f5ff
+    max-width: 320px
+    line-height: 1.3
