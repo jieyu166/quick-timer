@@ -201,14 +201,15 @@ run = function(){
   }
 };
 resize = function(){
-  var tm, w, h, len;
+  var tm, w, h, len, fontSize;
   tm = $('#timer');
   w = tm.width();
   h = $(window).height();
   len = tm.text().length;
   len >= 3 || (len = 3);
-  tm.css('font-size', 1.5 * w / len + "px");
-  return tm.css('line-height', h + "px");
+  fontSize = 1.5 * w / len;
+  fontSize = Math.min(fontSize, h * 0.8);
+  return tm.css('font-size', fontSize + "px");
 };
 window.onload = function(){
   updateTimerDisplay(delay);
